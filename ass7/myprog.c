@@ -7,24 +7,21 @@
 #include <signal.h>
 #include <string.h>
 
-char *msg2;
-static void print_msg()
+
+static void print_msg(char *msg)
 {
-	puts(msg2);
+	puts(msg);
 }
 
 int main(int argc, char *argv[])
 {
 
-	sigset_t set,set2;
-	int sig,sig2;
-	int *sigptr = &sig,*sigptr2=&sig2;
+	sigset_t set;
+	int sig;
+	int *sigptr = &sig;
 	sigemptyset(&set);
-	sigemptyset(&set2);
-	sigaddset(&set,SIGUSR1);
-	sigaddset(&set2,SIGUSR2);	
+	sigaddset(&set,SIGUSR1);	
 	sigprocmask( SIG_BLOCK, &set, NULL );
-	sigprocmask( SIG_BLOCK, &set2, NULL );
 	
 	int self,pid = atoi(argv[1]);
 	key_t k = atoi(argv[2]);
@@ -40,17 +37,16 @@ int main(int argc, char *argv[])
 	printf("Enter Partner's PID\n");
 	scanf("%d",&pid);
 
-	msg2 = msg;
 	while(1){
 	
 	sigwait(&set,sigptr);
 	if(*sigptr==10 || *sigptr==30 || *sigptr==16)
-		print_msg();
+		print_msg(msg);
 
 			{
 				printf("$ ") ;
 				gets(msg);
-				kill(pid, SIGUSR2);
+				kill(pid, SIGUSR1);
 			}
 	}
 	
@@ -59,14 +55,12 @@ int main(int argc, char *argv[])
 	else{
 			
 			while(1){
-		
 			printf("$ ") ;
 			gets(msg);
-			msg2 = msg;
 			kill(pid, SIGUSR1);
-			sigwait(&set2,sigptr2);
-			if(*sigptr2==12 || *sigptr2==31 || *sigptr2==17)
-			print_msg();
+			sigwait(&set,sigptr);
+			if(*sigptr==10 || *sigptr==30 || *sigptr==16)
+			print_msg(msg);
 
 		}
 	}
